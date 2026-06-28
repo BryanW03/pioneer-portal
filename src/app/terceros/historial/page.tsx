@@ -1,11 +1,12 @@
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { formatDistanceToNow, format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Search, FileText, User, Calendar, Phone, Mail } from 'lucide-react'
-
-export const dynamic = 'force-dynamic'
 
 export default async function HistorialPage({
   searchParams,
@@ -30,12 +31,7 @@ export default async function HistorialPage({
     : {}
 
   const [terceros, total] = await Promise.all([
-    prisma.tercero.findMany({
-      where,
-      skip,
-      take: limit,
-      orderBy: { createdAt: 'desc' },
-    }),
+    prisma.tercero.findMany({ where, skip, take: limit, orderBy: { createdAt: 'desc' } }),
     prisma.tercero.count({ where }),
   ])
 
@@ -43,7 +39,6 @@ export default async function HistorialPage({
 
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto">
-      {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
           <span>Portal</span><span>/</span>
@@ -60,7 +55,6 @@ export default async function HistorialPage({
         </div>
       </div>
 
-      {/* Search */}
       <div className="relative mb-6 max-w-md">
         <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
         <form>
@@ -73,7 +67,6 @@ export default async function HistorialPage({
         </form>
       </div>
 
-      {/* Table */}
       <div className="pioneer-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="pioneer-table">
@@ -96,7 +89,7 @@ export default async function HistorialPage({
                   </td>
                 </tr>
               ) : (
-                terceros.map(t => (
+                terceros.map((t: any) => (
                   <tr key={t.id}>
                     <td>
                       <span className="font-mono text-xs bg-gray-50 px-2 py-1 rounded border border-gray-100">
@@ -159,27 +152,19 @@ export default async function HistorialPage({
           </table>
         </div>
 
-        {/* Pagination */}
         {pages > 1 && (
           <div className="flex items-center justify-between px-6 py-4 border-t border-gray-50">
-            <p className="text-xs text-gray-400">
-              Página {page} de {pages} ({total} registros)
-            </p>
+            <p className="text-xs text-gray-400">Página {page} de {pages} ({total} registros)</p>
             <div className="flex gap-2">
               {page > 1 && (
-                <a
-                  href={`?page=${page - 1}${search ? `&search=${search}` : ''}`}
-                  className="px-3 py-1.5 text-xs border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600"
-                >
+                <a href={`?page=${page - 1}${search ? `&search=${search}` : ''}`}
+                  className="px-3 py-1.5 text-xs border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600">
                   ← Anterior
                 </a>
               )}
               {page < pages && (
-                <a
-                  href={`?page=${page + 1}${search ? `&search=${search}` : ''}`}
-                  className="px-3 py-1.5 text-xs border border-pioneer-purple rounded-lg
-                    bg-pioneer-purple text-white hover:bg-pioneer-purple-light"
-                >
+                <a href={`?page=${page + 1}${search ? `&search=${search}` : ''}`}
+                  className="px-3 py-1.5 text-xs border border-pioneer-purple rounded-lg bg-pioneer-purple text-white hover:bg-pioneer-purple-light">
                   Siguiente →
                 </a>
               )}
