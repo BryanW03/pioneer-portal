@@ -1,0 +1,126 @@
+// Pioneer Portal - Prisma Schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── USERS ─────────────────────────────────────────────────────────────────
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  image         String?
+  role          String    @default("user")   // "admin" | "user"
+  isActive      Boolean   @default(true)
+  department    String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String?   // email of admin who created this user
+
+  // Relations
+  terceros      Tercero[]
+  auditLogs     AuditLog[]
+  sessions      Session[]
+  accounts      Account[]
+
+  @@map("users")
+}
+
+// NextAuth required models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ─── TERCEROS ──────────────────────────────────────────────────────────────
+model Tercero {
+  id             String    @id @default(cuid())
+  rncCedula      String    @unique
+  nombreRazon    String
+  telefono       String
+  correo         String?
+  direccion      String?
+  porcImpuesto   String?
+  observaciones  String?
+  status         String    @default("activo")  // "activo" | "inactivo"
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Audit: who created it
+  createdById    String
+  createdByName  String
+  createdByEmail String
+  createdBy      User      @relation(fields: [createdById], references: [id])
+
+  // Edit history
+  editHistory    TerceroEdit[]
+
+  @@map("terceros")
+}
+
+model TerceroEdit {
+  id           String   @id @default(cuid())
+  terceroId    String
+  tercero      Tercero  @relation(fields: [terceroId], references: [id], onDelete: Cascade)
+  fieldChanged String
+  oldValue     String?
+  newValue     String?
+  editedById   String
+  editedByName String
+  editedByEmail String
+  createdAt    DateTime @default(now())
+
+  @@map("tercero_edits")
+}
+
+// ─── AUDIT LOG ─────────────────────────────────────────────────────────────
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String   // "CREATE_TERCERO" | "EDIT_TERCERO" | "CREATE_USER" | "LOGIN" | etc.
+  entity    String?  // "Tercero" | "User"
+  entityId  String?
+  details   String?  // JSON string with details
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@map("audit_logs")
+}
