@@ -1,8 +1,6 @@
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-export const revalidate = 0
-
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
@@ -11,7 +9,6 @@ import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 
-export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions)
