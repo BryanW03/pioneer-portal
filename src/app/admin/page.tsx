@@ -6,6 +6,8 @@ import { es } from 'date-fns/locale'
 import { Shield, Users, FileText, Activity, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminPage() {
   const session = await getServerSession(authOptions)
 

@@ -5,6 +5,8 @@ import { formatDistanceToNow, format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Search, FileText, User, Calendar, Phone, Mail } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export default async function HistorialPage({
   searchParams,
 }: {

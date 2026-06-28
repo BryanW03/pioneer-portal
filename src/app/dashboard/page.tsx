@@ -6,14 +6,15 @@ import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions)
   const isAdmin = session?.user?.role === 'admin'
 
-  // Stats
   const [totalTerceros, totalUsers, recentTerceros, recentLogs] = await Promise.all([
     prisma.tercero.count(),
-    isAdmin ? prisma.user.count({ where: { isActive: true } }) : null,
+    isAdmin ? prisma.user.count({ where: { isActive: true } }) : Promise.resolve(null),
     prisma.tercero.findMany({
       take: 5,
       orderBy: { createdAt: 'desc' },
@@ -34,7 +35,6 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto">
-      {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">
           {greeting}, {session?.user?.name?.split(' ')[0]} 👋
@@ -44,7 +44,6 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Stats cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         <StatCard
           icon={<FileText className="text-pioneer-purple" size={22} />}
@@ -56,7 +55,7 @@ export default async function DashboardPage() {
           <StatCard
             icon={<Users className="text-blue-600" size={22} />}
             label="Usuarios Activos"
-            value={totalUsers}
+            value={totalUsers as number}
             bg="bg-blue-50"
           />
         )}
@@ -71,7 +70,6 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* Recent Terceros */}
         <div className="lg:col-span-3 pioneer-card p-0 overflow-hidden">
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-50">
             <h2 className="font-semibold text-gray-800">Terceros Recientes</h2>
@@ -81,11 +79,9 @@ export default async function DashboardPage() {
           </div>
           <div className="divide-y divide-gray-50">
             {recentTerceros.length === 0 ? (
-              <div className="px-6 py-8 text-center text-gray-400 text-sm">
-                No hay terceros creados aún
-              </div>
+              <div className="px-6 py-8 text-center text-gray-400 text-sm">No hay terceros creados aún</div>
             ) : (
-              recentTerceros.map(t => (
+              recentTerceros.map((t: any) => (
                 <div key={t.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
@@ -95,9 +91,7 @@ export default async function DashboardPage() {
                     <div className="text-right flex-shrink-0">
                       <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                         t.status === 'activo' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'
-                      }`}>
-                        {t.status}
-                      </span>
+                      }`}>{t.status}</span>
                       <p className="text-xs text-gray-400 mt-1">
                         {formatDistanceToNow(new Date(t.createdAt), { locale: es, addSuffix: true })}
                       </p>
@@ -110,7 +104,6 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Activity feed */}
         <div className="lg:col-span-2 pioneer-card p-0 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-50">
             <h2 className="font-semibold text-gray-800 flex items-center gap-2">
@@ -122,7 +115,7 @@ export default async function DashboardPage() {
             {recentLogs.length === 0 ? (
               <div className="p-5 text-center text-gray-400 text-sm">Sin actividad</div>
             ) : (
-              recentLogs.map(log => (
+              recentLogs.map((log: any) => (
                 <div key={log.id} className="px-5 py-3">
                   <div className="flex items-start gap-2.5">
                     <div className="w-1.5 h-1.5 rounded-full bg-pioneer-purple mt-2 flex-shrink-0" />
@@ -141,7 +134,6 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Quick actions */}
       <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Link href="/terceros/nuevo" className="pioneer-card p-5 hover:border-pioneer-purple/30
           border border-transparent flex items-center gap-4 group">
@@ -190,12 +182,9 @@ function StatCard({ icon, label, value, bg }: {
 
 function getActionLabel(action: string) {
   const labels: Record<string, string> = {
-    LOGIN: 'Inicio de sesión',
-    CREATE_TERCERO: 'Tercero creado',
-    EDIT_TERCERO: 'Tercero editado',
-    CREATE_USER: 'Usuario creado',
-    EDIT_USER: 'Usuario editado',
-    DEACTIVATE_USER: 'Usuario desactivado',
+    LOGIN: 'Inicio de sesión', CREATE_TERCERO: 'Tercero creado',
+    EDIT_TERCERO: 'Tercero editado', CREATE_USER: 'Usuario creado',
+    EDIT_USER: 'Usuario editado', DEACTIVATE_USER: 'Usuario desactivado',
     CHANGE_ROLE: 'Rol modificado',
   }
   return labels[action] || action

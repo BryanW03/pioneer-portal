@@ -2,6 +2,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { TerceroForm } from '@/components/forms/TerceroForm'
 
+export const dynamic = 'force-dynamic'
+
 export default async function NuevoTerceroPage() {
   const session = await getServerSession(authOptions)
 

@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { createAuditLog } from '@/lib/audit'
 
+export const dynamic = 'force-dynamic'
+
 // GET - list users (admin only)
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions)

@@ -3,6 +3,8 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { UserManagement } from '@/components/forms/UserManagement'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminUsuariosPage() {
   const session = await getServerSession(authOptions)
 
