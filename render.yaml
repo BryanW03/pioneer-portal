@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: pioneer-portal
+    env: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 20.0.0
+      - key: NEXTAUTH_URL
+        sync: false
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: AZURE_AD_CLIENT_ID
+        sync: false
+      - key: AZURE_AD_CLIENT_SECRET
+        sync: false
+      - key: AZURE_AD_TENANT_ID
+        sync: false
+      - key: DATABASE_URL
+        value: file:/var/data/pioneer.db
+      - key: ADMIN_EMAIL
+        value: b.deleon@pioneerfunds.do
+    disk:
+      name: pioneer-db
+      mountPath: /var/data
+      sizeGB: 1

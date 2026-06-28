@@ -1,6 +1,8 @@
 // Pioneer Portal - Prisma Schema
 generator client {
   provider = "prisma-client-js"
+  // Required for Next.js standalone output on Render
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -14,14 +16,13 @@ model User {
   email         String    @unique
   name          String
   image         String?
-  role          String    @default("user")   // "admin" | "user"
+  role          String    @default("user")
   isActive      Boolean   @default(true)
   department    String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  createdBy     String?   // email of admin who created this user
+  createdBy     String?
 
-  // Relations
   terceros      Tercero[]
   auditLogs     AuditLog[]
   sessions      Session[]
@@ -30,7 +31,6 @@ model User {
   @@map("users")
 }
 
-// NextAuth required models
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -79,33 +79,31 @@ model Tercero {
   direccion      String?
   porcImpuesto   String?
   observaciones  String?
-  status         String    @default("activo")  // "activo" | "inactivo"
+  status         String    @default("activo")
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  // Audit: who created it
   createdById    String
   createdByName  String
   createdByEmail String
   createdBy      User      @relation(fields: [createdById], references: [id])
 
-  // Edit history
   editHistory    TerceroEdit[]
 
   @@map("terceros")
 }
 
 model TerceroEdit {
-  id           String   @id @default(cuid())
-  terceroId    String
-  tercero      Tercero  @relation(fields: [terceroId], references: [id], onDelete: Cascade)
-  fieldChanged String
-  oldValue     String?
-  newValue     String?
-  editedById   String
-  editedByName String
+  id            String   @id @default(cuid())
+  terceroId     String
+  tercero       Tercero  @relation(fields: [terceroId], references: [id], onDelete: Cascade)
+  fieldChanged  String
+  oldValue      String?
+  newValue      String?
+  editedById    String
+  editedByName  String
   editedByEmail String
-  createdAt    DateTime @default(now())
+  createdAt     DateTime @default(now())
 
   @@map("tercero_edits")
 }
@@ -115,10 +113,10 @@ model AuditLog {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id])
-  action    String   // "CREATE_TERCERO" | "EDIT_TERCERO" | "CREATE_USER" | "LOGIN" | etc.
-  entity    String?  // "Tercero" | "User"
+  action    String
+  entity    String?
   entityId  String?
-  details   String?  // JSON string with details
+  details   String?
   ip        String?
   createdAt DateTime @default(now())
 
